@@ -1,0 +1,12 @@
+[Unit]
+Description=RPiBackups Service
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/RPiBackups/
+ExecStart=/usr/bin/python3 /home/pi/RPiBackups/RPiBackups.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
