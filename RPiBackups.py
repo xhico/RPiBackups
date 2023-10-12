@@ -62,8 +62,18 @@ def main():
     for copyDevice in copyToDevices:
         logger.info("copyDevice: " + copyDevice)
 
-        # Set up an SSH connection to the target device
-        sftp = setSSHConnection(copyDevice)
+        # Set up an SSH connection to the target device with a retry mechanism
+        sftp, max_retries = None, 3
+        for _ in range(max_retries):
+            try:
+                sftp = setSSHConnection(copyDevice)
+                if sftp is not None:
+                    break
+            except Exception as ex:
+                logger.error("Failed to connect to " + copyDevice)
+
+        if sftp is None:
+            raise Exception("Failed to connect to " + copyDevice)
 
         # Create the bak_folder if it doesn't exist
         bak_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bak")
@@ -103,6 +113,6 @@ if __name__ == '__main__':
         main()
     except Exception as ex:
         logger.error(traceback.format_exc())
-        sendEmail(os.path.basename(__file__), str(traceback.format_exc()))
+        # sendEmail(os.path.basename(__file__), str(traceback.format_exc()))
     finally:
         logger.info("End")
