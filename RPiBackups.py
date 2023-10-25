@@ -89,6 +89,14 @@ def main():
             BAKFilename = hostname + "_" + localPath.replace("/", "_SLASH_") + ".bak"
             BAKFilePath = os.path.join(bak_folder, BAKFilename)
 
+            # Check if the local file is smaller than the backup
+            local_size = os.path.getsize(localPath)
+            backup_size = os.path.getsize(BAKFilePath) if os.path.exists(BAKFilePath) else 0
+            if local_size < backup_size:
+                sendEmail(os.path.basename(__file__), localPath + "\n" + "Local file is smaller or equal to the backup. Skipping.")
+                logger.info("Local file is smaller or equal to the backup. Skipping.")
+                continue
+
             # Copy/Send Files
             shutil.copyfile(localPath, BAKFilePath)
             sftp.put(localPath, BAKFilePath)
@@ -113,6 +121,6 @@ if __name__ == '__main__':
         main()
     except Exception as ex:
         logger.error(traceback.format_exc())
-        # sendEmail(os.path.basename(__file__), str(traceback.format_exc()))
+        sendEmail(os.path.basename(__file__), str(traceback.format_exc()))
     finally:
         logger.info("End")
