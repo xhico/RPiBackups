@@ -21,27 +21,35 @@ def setSSHConnection(copyDevice):
     Returns:
         paramiko.SFTP: An SFTP object for file transfer over SSH.
     """
-    # Get SSH_CONFIG from configuration
-    SSH_CONFIG = config[copyDevice]["SSH_CONFIG"]
+    sftp, max_retries = None, 3
+    for _ in range(max_retries):
+        try:
+            # Get SSH_CONFIG from configuration
+            logger.info("Try to connect to " + copyDevice)
+            SSH_CONFIG = config[copyDevice]["SSH_CONFIG"]
 
-    # Get SSH configuration parameters from a function named get911
-    SSH_CONFIG["IP"] = get911(copyDevice + "_SSH_CONFIG")["ip"]
-    SSH_CONFIG["PORT"] = get911(copyDevice + "_SSH_CONFIG")["port"]
-    SSH_CONFIG["USER"] = get911(copyDevice + "_SSH_CONFIG")["user"]
-    SSH_CONFIG["PASSPHRASE"] = get911(copyDevice + "_SSH_CONFIG")["passphrase"]
+            # Get SSH configuration parameters from a function named get911
+            SSH_CONFIG["IP"] = get911(copyDevice + "_SSH_CONFIG")["ip"]
+            SSH_CONFIG["PORT"] = get911(copyDevice + "_SSH_CONFIG")["port"]
+            SSH_CONFIG["USER"] = get911(copyDevice + "_SSH_CONFIG")["user"]
+            SSH_CONFIG["PASSPHRASE"] = get911(copyDevice + "_SSH_CONFIG")["passphrase"]
 
-    # Create an SSH client instance
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            # Create an SSH client instance
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    # Load the private key with passphrase
-    private_key = paramiko.RSAKey.from_private_key_file(SSH_CONFIG["PRIVATE_KEY"], password=SSH_CONFIG["PASSPHRASE"])
+            # Load the private key with passphrase
+            private_key = paramiko.RSAKey.from_private_key_file(SSH_CONFIG["PRIVATE_KEY"], password=SSH_CONFIG["PASSPHRASE"])
 
-    # Establish an SSH connection
-    ssh.connect(hostname=SSH_CONFIG["IP"], port=SSH_CONFIG["PORT"], username=SSH_CONFIG["USER"], pkey=private_key)
+            # Establish an SSH connection
+            ssh.connect(hostname=SSH_CONFIG["IP"], port=SSH_CONFIG["PORT"], username=SSH_CONFIG["USER"], pkey=private_key)
 
-    # Open an SFTP session over the SSH connection
-    sftp = ssh.open_sftp()
+            # Open an SFTP session over the SSH connection
+            sftp = ssh.open_sftp()
+            if sftp is not None:
+                break
+        except Exception as ex:
+            logger.error("Failed to connect to " + copyDevice)
 
     return sftp
 
@@ -63,17 +71,11 @@ def main():
         logger.info("copyDevice: " + copyDevice)
 
         # Set up an SSH connection to the target device with a retry mechanism
-        sftp, max_retries = None, 3
-        for _ in range(max_retries):
-            try:
-                sftp = setSSHConnection(copyDevice)
-                if sftp is not None:
-                    break
-            except Exception as ex:
-                logger.error("Failed to connect to " + copyDevice)
-
+        # Send email if failed to connect
+        sftp = setSSHConnection(copyDevice)
         if sftp is None:
-            raise Exception("Failed to connect to " + copyDevice)
+            logger.info("Sending error email")
+            sendEmail(os.path.basename(__file__), "Failed to connect to " + copyDevice)
 
         # Create the bak_folder if it doesn't exist
         bak_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bak")
@@ -89,17 +91,10 @@ def main():
             BAKFilename = hostname + "_" + localPath.replace("/", "_SLASH_") + ".bak"
             BAKFilePath = os.path.join(bak_folder, BAKFilename)
 
-            # # Check if the local file is smaller than the backup
-            # local_size = os.path.getsize(localPath)
-            # backup_size = os.path.getsize(BAKFilePath) if os.path.exists(BAKFilePath) else 0
-            # if local_size < backup_size:
-            #     sendEmail(os.path.basename(__file__), localPath + "\n" + "Local file is smaller or equal to the backup. Skipping.")
-            #     logger.info("Local file is smaller or equal to the backup. Skipping.")
-            #     continue
-
             # Copy/Send Files
             shutil.copyfile(localPath, BAKFilePath)
-            sftp.put(localPath, BAKFilePath)
+            if sftp is not None:
+                sftp.put(localPath, BAKFilePath)
 
     return
 
