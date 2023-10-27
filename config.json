@@ -12,7 +12,6 @@
       "/home/pi/FogosPtAlerts/saved_info.json",
       "/home/pi/HardwareHistory/config.json",
       "/home/pi/HardwareHistory/saved_info.json",
-      "/home/pi/HumiditySensor/saved_info.json",
       "/home/pi/RPiStatus/config.json",
       "/home/pi/RPiStatus/saved_info.json"
     ]
@@ -26,6 +25,7 @@
       "/home/pi/RPiBackups/config.json",
       "/home/pi/HardwareHistory/config.json",
       "/home/pi/HardwareHistory/saved_info.json",
+      "/home/pi/HumiditySensor/saved_info.json",
       "/home/pi/RPiStatus/config.json",
       "/home/pi/RPiStatus/saved_info.json"
     ]
