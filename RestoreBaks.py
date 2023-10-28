@@ -23,7 +23,7 @@ def main():
             relative_path = os.path.relpath(source_file_path, bak_folder)
             if relative_path.startswith(hostname):
                 relative_path = relative_path.replace(hostname + "_", "").replace("_SLASH_", "/").replace(".bak", "")
-                print(relative_path)
+                logger.info(relative_path)
                 shutil.copy(source_file_path, relative_path)
 
     return
