@@ -21,7 +21,6 @@
       "PRIVATE_KEY": "/home/pi/id_rsa"
     },
     "LOCAL_PATHS": [
-      "/etc/pihole/pihole-FTL.db",
       "/home/pi/RPiBackups/config.json",
       "/home/pi/HardwareHistory/config.json",
       "/home/pi/HardwareHistory/saved_info.json",
