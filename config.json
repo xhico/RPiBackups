@@ -28,5 +28,17 @@
       "/home/pi/RPiStatus/config.json",
       "/home/pi/RPiStatus/saved_info.json"
     ]
+  },
+  "RPIZ": {
+    "SSH_CONFIG": {
+      "PRIVATE_KEY": "/home/pi/id_rsa"
+    },
+    "LOCAL_PATHS": [
+      "/home/pi/RPiBackups/config.json",
+      "/home/pi/HardwareHistory/config.json",
+      "/home/pi/HardwareHistory/saved_info.json",
+      "/home/pi/RPiStatus/config.json",
+      "/home/pi/RPiStatus/saved_info.json"
+    ]
   }
 }
