@@ -37,11 +37,6 @@ if __name__ == '__main__':
 
     logger.info("----------------------------------------------------")
 
-    # Load configuration from JSON file
-    configFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
-    with open(configFile) as inFile:
-        config = json.load(inFile)
-
     try:
         main()
     except Exception as ex:

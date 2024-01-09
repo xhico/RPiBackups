@@ -65,22 +65,25 @@ def main():
     hostname = str(socket.gethostname()).upper()
     logger.info("hostname: " + hostname)
 
+    # Create the bak_folder if it doesn't exist
+    bak_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bak")
+    if not os.path.exists(bak_folder):
+        os.makedirs(bak_folder)
+
     # Find other devices to copy to
-    copyToDevices = [item for item in config.keys() if item != hostname]
+    copyToDevices = [item for item in config.keys()]
     for copyDevice in copyToDevices:
         logger.info("copyDevice: " + copyDevice)
+        sftp = None
 
-        # Set up an SSH connection to the target device with a retry mechanism
-        # Send email if failed to connect
-        sftp = setSSHConnection(copyDevice)
-        if sftp is None:
-            logger.info("Sending error email")
-            sendEmail(os.path.basename(__file__), "Failed to connect to " + copyDevice)
+        if hostname != copyDevice:
+            # Set up an SSH connection to the target device with a retry mechanism
+            sftp = setSSHConnection(copyDevice)
 
-        # Create the bak_folder if it doesn't exist
-        bak_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bak")
-        if not os.path.exists(bak_folder):
-            os.makedirs(bak_folder)
+            # Send email if failed to connect
+            if sftp is None:
+                logger.info("Sending error email")
+                sendEmail(os.path.basename(__file__), "Failed to connect to " + copyDevice)
 
         # Iterate over every file to copy
         LOCAL_PATHS = config[hostname]["LOCAL_PATHS"]

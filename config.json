@@ -1,4 +1,21 @@
 {
+  "RPI5": {
+    "SSH_CONFIG": {
+      "PRIVATE_KEY": "/home/pi/id_rsa"
+    },
+    "LOCAL_PATHS": [
+      "/home/pi/ddnsUpdater/saved_info.json",
+      "/home/pi/EZTV-AutoDownloader/config.json",
+      "/home/pi/EZTV-AutoDownloader/saved_info.json",
+      "/home/pi/FogosPtAlerts/config.json",
+      "/home/pi/FogosPtAlerts/saved_info.json",      
+      "/home/pi/RPiBackups/config.json",
+      "/home/pi/HardwareHistory/config.json",
+      "/home/pi/HardwareHistory/saved_info.json",
+      "/home/pi/RPiStatus/config.json",
+      "/home/pi/RPiStatus/saved_info.json"
+    ]
+  },
   "RPI4": {
     "SSH_CONFIG": {
       "PRIVATE_KEY": "/home/pi/id_rsa"
