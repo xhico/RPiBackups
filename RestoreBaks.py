@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/python3
 
-import json
 import os
 import shutil
 import socket
@@ -11,22 +10,39 @@ from Misc import get911, sendEmail
 
 
 def main():
+    """
+    Main function to restore files from the 'bak' folder based on the current device's hostname.
+
+    This function retrieves the current device's hostname, locates backup files in the 'bak' folder
+    that match the hostname, and restores them to their original locations.
+
+    Note: The backup files in the 'bak' folder must follow a naming convention with the hostname
+    as a prefix.
+
+    Returns:
+        None
+    """
     # Get the hostname of the current device
     hostname = str(socket.gethostname()).upper()
-    logger.info("hostname: " + hostname)
+    logger.info(f"Hostname: {hostname}")
 
-    # Restore
+    # Restore files
     bak_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bak")
     for root, dirs, files in os.walk(bak_folder):
         for file in files:
             source_file_path = os.path.join(root, file)
             relative_path = os.path.relpath(source_file_path, bak_folder)
-            if relative_path.startswith(hostname):
-                relative_path = relative_path.replace(hostname + "_", "").replace("_SLASH_", "/").replace(".bak", "")
-                logger.info(relative_path)
-                shutil.copy(source_file_path, relative_path)
 
-    return
+            # Check if the backup file matches the current hostname
+            if relative_path.startswith(hostname):
+                # Modify the relative path to obtain the original file path
+                relative_path = relative_path.replace(f"{hostname}_", "")
+                relative_path = relative_path.replace("_SLASH_", "/")
+                relative_path = relative_path.replace(".bak", "")
+                logger.info(f"Restoring: {relative_path}")
+
+                # Copy the backup file to its original location
+                shutil.copy(source_file_path, relative_path)
 
 
 if __name__ == '__main__':

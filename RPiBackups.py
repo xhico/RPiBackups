@@ -25,7 +25,7 @@ def setSSHConnection(copyDevice):
     for _ in range(max_retries):
         try:
             # Get SSH_CONFIG from configuration
-            logger.info("Try to connect to " + copyDevice)
+            logger.info(f"Trying to connect to {copyDevice}")
             SSH_CONFIG = config[copyDevice]["SSH_CONFIG"]
 
             # Get SSH configuration parameters from a function named get911
@@ -49,7 +49,7 @@ def setSSHConnection(copyDevice):
             if sftp is not None:
                 break
         except Exception as ex:
-            logger.error("Failed to connect to " + copyDevice)
+            logger.error(f"Failed to connect to {copyDevice}")
 
     return sftp
 
@@ -63,7 +63,7 @@ def main():
     """
     # Get the hostname of the current device
     hostname = str(socket.gethostname()).upper()
-    logger.info("hostname: " + hostname)
+    logger.info(f"hostname: {hostname}")
 
     # Create the bak_folder if it doesn't exist
     bak_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bak")
@@ -73,7 +73,7 @@ def main():
     # Find other devices to copy to
     copyToDevices = [item for item in config.keys()]
     for copyDevice in copyToDevices:
-        logger.info("copyDevice: " + copyDevice)
+        logger.info(f"copyDevice: {copyDevice}")
         sftp = None
 
         if hostname != copyDevice:
@@ -82,16 +82,20 @@ def main():
 
             # Send email if failed to connect
             if sftp is None:
-                logger.info("Sending error email")
-                sendEmail(os.path.basename(__file__), "Failed to connect to " + copyDevice)
+                sendEmail(os.path.basename(__file__), f"Failed to connect to {copyDevice}")
 
         # Iterate over every file to copy
         LOCAL_PATHS = config[hostname]["LOCAL_PATHS"]
         for localPath in LOCAL_PATHS:
-            logger.info("localPath: " + localPath)
+            logger.info(f"File: {localPath}")
+
+            # Check if localPath exits
+            if not os.path.exists(localPath):
+                logger.warning(f"File {localPath} does not exists")
+                continue
 
             # Generate a backup file name based on timestamp, hostname, and localPath
-            BAKFilename = hostname + "_" + localPath.replace("/", "_SLASH_") + ".bak"
+            BAKFilename = f"{hostname}_{localPath.replace('/', '_SLASH_')}.bak"
             BAKFilePath = os.path.join(bak_folder, BAKFilename)
 
             # Copy/Send Files
